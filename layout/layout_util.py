@@ -9,11 +9,56 @@ from langchain_experimental.agents import create_pandas_dataframe_agent
 
 set_debug(False)
 
+
+
+
 def cria_checkbox(checkboxes, valor_inicial, valor_final, campos_interface, campos_checked):
     for campo in campos_interface:
          if campo.indice > valor_inicial and campo.indice <= valor_final:
             checkboxes[campo.name] = st.checkbox(campo.name,value=(True if campo.indice <=campos_checked else False), key=f'checkbox_{campos_interface.__class__.__name__}_{campo.name}')
 
+
+def cria_checkboxes_por_coluna(checkboxes, valor_inicial, valor_final, interface_enum, campos_checked):
+    cria_checkbox(checkboxes, valor_inicial, valor_final, interface_enum, campos_checked)
+
+def exibe_validacao_geral(validacao_campos):
+    resumo_validacao = """ 
+    # Validação geral da interface de item
+    """
+    for campo in validacao_campos:
+        st.markdown(f"***{campo['campo']}***")
+        resumo_validacao = resumo_validacao + "\n" +f" **Campo:** {campo['campo']}"+ "\n"
+                    
+        for validacao in campo['validacao']:
+            if validacao['erros_encontrados'] == True:
+                linhas = regras_negocio.lista_para_string(validacao['linhas'])
+                st.badge(f"***{validacao['tipo_validacao']}: Não OK*** // ***Linha(s):*** {linhas}", icon=":material/error:", color="red")
+                                
+                resumo_validacao = resumo_validacao + "\n" + (f"- {validacao['tipo_validacao']}: Não OK // Linha(s): {linhas}") + "\n"
+            else:
+                st.badge(f"***{validacao['tipo_validacao']}: OK***", icon=":material/check:", color="green")
+                resumo_validacao = resumo_validacao + "\n" + (f"- {validacao['tipo_validacao']}: OK") + "\n"
+    return resumo_validacao
+
+def exibe_validacao_especifica(validacoes_especificas):
+    resumo_validacao_especifica = """
+    # Validação especiespecífica da interface de item
+    """
+   
+    valor = st.session_state.get('validacao_executada', False)
+    if valor:
+        for campo in validacoes_especificas:
+            st.markdown(f"***{campo['campo']}***")
+            resumo_validacao_especifica = resumo_validacao_especifica + "\n" +f" **Campo:** {campo['campo']}"+ "\n"
+            for validacao in campo['validacao']:
+                if validacao['erros_encontrados'] == True:
+                    st.badge(f"***{validacao['tipo_validacao']}: Não OK*** // ***Linha(s):*** {validacao['linhas']}", icon=":material/error:", color="red")
+                    resumo_validacao_especifica = resumo_validacao_especifica + "\n" + (f"- {validacao['tipo_validacao']}: Não OK // Linha(s): {validacao['linhas']}") + "\n"
+                else:
+                    st.badge(f"***{validacao['tipo_validacao']}: OK***", icon=":material/check:", color="green")
+                    resumo_validacao_especifica = resumo_validacao_especifica + "\n" + (f"- {validacao['tipo_validacao']}: OK") + "\n"
+    return resumo_validacao_especifica
+    
 
 def monta_tab_interface(llm, cabecalho, df_csv, interface, interface_enum, campos_checked, validacoes_especificas):
     validacao_campos = []
@@ -41,6 +86,7 @@ def monta_tab_interface(llm, cabecalho, df_csv, interface, interface_enum, campo
 
     with col5_campos:
         cria_checkbox(checkboxes, 19, 24, interface_enum, campos_checked)
+
 
     with col6_campos:
         if st.button(f'Validar {interface}', icon=':material/list_alt_check:'):
@@ -94,9 +140,7 @@ def monta_tab_interface(llm, cabecalho, df_csv, interface, interface_enum, campo
                     else:
                         st.badge(f"***{validacao['tipo_validacao']}: OK***", icon=":material/check:", color="green")
                         resumo_validacao = resumo_validacao + "\n" + (f"- {validacao['tipo_validacao']}: OK") + "\n"
-    
-    
-    
+
     with col2_validacao_especifica:
         with st.container(height=500):
             st.markdown(f"***Validação Específica da interface de item***")
@@ -115,14 +159,15 @@ def monta_tab_interface(llm, cabecalho, df_csv, interface, interface_enum, campo
                             resumo_validacao_especifica = resumo_validacao_especifica + "\n" + (f"- {validacao['tipo_validacao']}: OK") + "\n"
 
     
+    
     with col3_resumo_cliente:
         with st.container(height=500):
             st.markdown(f"***Resumo para encaminhar para o cliente***")
             if  st.session_state.get('validacao_execuctada',False):
                 modelo_do_prompt = texto_prompt.texto_gerar_resumo_validacao(interface, resumo_validacao)
                 prompt = modelo_do_prompt.format(interface=interface)
-                #resposta = llm.invoke(prompt)
-                st.markdown('resposta.content')
+                resposta = llm.invoke(prompt)
+                st.markdown(resposta.content)
         
                
 

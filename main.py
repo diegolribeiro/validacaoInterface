@@ -13,6 +13,8 @@ st.set_page_config(layout='wide')
 st.title("Validador de interface")
 st.session_state['validacao_execuctada'] = False
 load_dotenv()
+pg = st.navigation(["layout/page1.py"],position="sidebar")
+pg.run()
 
 llm = ChatOpenAI(model='gpt-3.5-turbo',
     temperature=0.0,
