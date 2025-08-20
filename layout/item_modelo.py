@@ -1,13 +1,14 @@
 import streamlit as st
 from  enumerator.itemEnum import Campos_interface_item as interface_enum
 from layout.layout_util import cria_checkboxes_por_coluna, exibe_validacao_geral, exibe_validacao_especifica
-from regras_negocio import LLM as llm
+from regras_negocio import LLM as llm, interface_item_regras as validacao_regras_item
 from validador import validador
 import pandas as pd
 import prompt.texto_prompt as texto_prompt
 
+df_fornecedor = pd.read_csv("./dados/fornecedores.csv", sep=";", thousands=".", decimal=",", encoding="latin1", keep_default_na=False, dtype=str,index_col=False)
+df = pd.read_csv("./dados/itens.csv", sep=";", thousands=".", decimal=",", encoding="utf8", keep_default_na=False, dtype=str,index_col=False)
 
-df = pd.read_csv("./dados/itens.csv", sep=";", thousands=".", decimal=",", encoding="latin1", keep_default_na=False, dtype=str)
 interface = 'Interface de item'
 st.title(interface)
 col1_campos, col2_campos, col3_campos, col4_campos, col5_campos, col6_btn_validar = st.columns(6)
@@ -63,13 +64,14 @@ if df is not None:
 col1_validacao_geral, col2_validacao_especifica, col3_resumo_cliente = st.columns(3)
 with col1_validacao_geral:               
    with st.container(height=500):
-      st.markdown(f"***Validação Geral da interface de item***")
+      st.markdown(f"***Validação Geral da {interface}***")
       resumo_validacao = exibe_validacao_geral(validacao_campos)
 
 with col2_validacao_especifica:               
    with st.container(height=500):
-      st.markdown(f"***Validação Específica da interface de item***")
-      resumo_validacao_especifica = exibe_validacao_especifica(validacao_campos)         
+      st.markdown(f"***Validação Específica da {interface}***")
+      campos = validacao_regras_item.validacao_especifica_interface_item(df, df_fornecedor, False)
+      resumo_validacao_especifica = exibe_validacao_especifica(campos)         
 
 with col3_resumo_cliente:
    with st.container(height=500):
@@ -79,9 +81,9 @@ with col3_resumo_cliente:
          modelo_do_prompt = texto_prompt.texto_gerar_resumo_validacao(interface, resumo_validacao)
          prompt = modelo_do_prompt.format(interface=interface)
          #llm = llm.llm()
-         #st.session_state.resposta_llm = llm.invoke(prompt).content
+         #st.session_state.resposta_llm_item = llm.invoke(prompt).content
       
-      st.markdown(st.session_state.get('resposta_llm',''))
+      st.markdown(st.session_state.get('resposta_llm_item',''))
       st.session_state.validacao_executada = False
          
          

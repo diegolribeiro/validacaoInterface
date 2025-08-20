@@ -1,5 +1,5 @@
 import streamlit as st
-from  enumerator.localEstoqueEnum import Campos_interface as interface_enum
+from  enumerator.itemEnum import Campos_interface_item as interface_enum
 from layout.layout_util import cria_checkboxes_por_coluna, exibe_validacao_geral, exibe_validacao_especifica
 from regras_negocio import LLM as llm
 from validador import validador
@@ -76,14 +76,15 @@ with col2_validacao_especifica:
 with col3_resumo_cliente:
    with st.container(height=500):
       st.markdown(f"***Resumo para encaminhar para o cliente***")
-      
+      st.session_state.get('mostrar', None)   
+
       if st.session_state.get("validacao_executada",False):
          modelo_do_prompt = texto_prompt.texto_gerar_resumo_validacao(interface, resumo_validacao)
          prompt = modelo_do_prompt.format(interface=interface)
          #llm = llm.llm()
-         #st.session_state.resposta_llm_local_estoque = llm.invoke(prompt).content
+         #st.session_state.resposta_llm_dd2 = llm.invoke(prompt).content
       
-      st.markdown(st.session_state.get('resposta_llm_local_estoque',''))
+      st.markdown(st.session_state.get('resposta_llm_dd2',''))
       st.session_state.validacao_executada = False
          
          

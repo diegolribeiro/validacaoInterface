@@ -65,28 +65,27 @@ if df is not None:
 col1_validacao_geral, col2_validacao_especifica, col3_resumo_cliente = st.columns(3)
 with col1_validacao_geral:               
    with st.container(height=500):
-      st.markdown(f"***Validação Geral da interface de item***")
+      st.markdown(f"***Validação Geral da {interface}***")
       resumo_validacao = exibe_validacao_geral(validacao_campos)
 
 with col2_validacao_especifica:               
    with st.container(height=500):
-      st.markdown(f"***Validação Específica da interface de item***")
-      resumo_validacao_especifica = exibe_validacao_especifica(validacao_campos)
+      st.markdown(f"***Validação Específica da {interface}***")
+      
          
            
 
 with col3_resumo_cliente:
    with st.container(height=500):
       st.markdown(f"***Resumo para encaminhar para o cliente***")
-      st.session_state.get('mostrar', None)   
-
+      
       if st.session_state.get("validacao_executada",False):
          modelo_do_prompt = texto_prompt.texto_gerar_resumo_validacao(interface, resumo_validacao)
          prompt = modelo_do_prompt.format(interface=interface)
-         llm = llm.llm()
-         st.session_state.resposta_llm = llm.invoke(prompt).content
+         #llm = llm.llm()
+         #st.session_state.resposta_llm_fornecedor = llm.invoke(prompt).content
       
-      st.markdown(st.session_state.get('resposta_llm',''))
+      st.markdown(st.session_state.get('resposta_llm_fornecedor',''))
       st.session_state.validacao_executada = False
          
          

@@ -69,22 +69,21 @@ with col1_validacao_geral:
 with col2_validacao_especifica:               
    with st.container(height=500):
       st.markdown(f"***Validação Específica da interface de item***")
-      resumo_validacao_especifica = exibe_validacao_especifica(validacao_campos)
+      
          
            
 
 with col3_resumo_cliente:
    with st.container(height=500):
       st.markdown(f"***Resumo para encaminhar para o cliente***")
-      st.session_state.get('mostrar', None)   
-
+      
       if st.session_state.get("validacao_executada",False):
          modelo_do_prompt = texto_prompt.texto_gerar_resumo_validacao(interface, resumo_validacao)
          prompt = modelo_do_prompt.format(interface=interface)
-         llm = llm.llm()
-         st.session_state.resposta_llm_item = llm.invoke(prompt).content
+         #llm = llm.llm()
+         #st.session_state.resposta_llm_dd1 = llm.invoke(prompt).content
       
-      st.markdown(st.session_state.get('resposta_llm_item',''))
+      st.markdown(st.session_state.get('resposta_llm_dd1',''))
       st.session_state.validacao_executada = False
          
          
